@@ -39,10 +39,10 @@ Service is installed but **not started** until `ALPACA_API_KEY` and `ALPACA_SECR
 cd ~/projects/DayTradeBot && ./scripts/run.sh --discord-test
 ```
 
-After keys:
+Service unit is installed under `~/.config/systemd/user/daytradebot.service` but **disabled** until Alpaca keys are in `.env` (avoids restart loops). After keys:
 
 ```bash
 ./scripts/smoke-check.sh
-./scripts/daytradebot-ctl.sh restart
 ./scripts/daytradebot-ctl.sh enable
+./scripts/daytradebot-ctl.sh restart
 ```
