@@ -4,19 +4,20 @@ import logging
 import socket
 import time
 from collections.abc import Callable
-from datetime import datetime, timedelta, timezone
+from datetime import date, datetime, timedelta, timezone
 from typing import Any
 from zoneinfo import ZoneInfo
 
 import pandas as pd
 import requests
+from alpaca.common.enums import Sort
 from alpaca.data.enums import DataFeed
 from alpaca.data.historical import StockHistoricalDataClient
 from alpaca.data.requests import StockBarsRequest
 from alpaca.data.timeframe import TimeFrame, TimeFrameUnit
 from alpaca.trading.client import TradingClient
-from alpaca.trading.enums import OrderSide, TimeInForce
-from alpaca.trading.requests import MarketOrderRequest
+from alpaca.trading.enums import OrderSide, QueryOrderStatus, TimeInForce
+from alpaca.trading.requests import GetOrdersRequest, MarketOrderRequest
 
 from daytradebot.account_status import normalize_account_status
 
@@ -194,6 +195,80 @@ class AlpacaBroker:
                     "avg_entry_price": float(pos.avg_entry_price),
                     "market_value": float(pos.market_value),
                     "unrealized_pl": float(pos.unrealized_pl),
+                }
+            )
+        return rows
+
+    def get_market_calendar(self, start: date, end: date) -> list[dict[str, Any]]:
+        from alpaca.trading.requests import GetCalendarRequest
+
+        days = self._call_with_retries(
+            f"get_calendar({start},{end})",
+            lambda: self._trading.get_calendar(GetCalendarRequest(start=start, end=end)),
+        )
+        rows: list[dict[str, Any]] = []
+        for day in days:
+            rows.append(
+                {
+                    "date": day.date,
+                    "open": day.open,
+                    "close": day.close,
+                }
+            )
+        return rows
+
+    def get_open_orders(self) -> list[dict[str, Any]]:
+        rows: list[dict[str, Any]] = []
+        orders = self._call_with_retries(
+            "get_orders(open)",
+            lambda: self._trading.get_orders(),
+        )
+        for order in orders:
+            rows.append(
+                {
+                    "id": str(order.id),
+                    "client_order_id": str(getattr(order, "client_order_id", "") or ""),
+                    "symbol": str(getattr(order, "symbol", "") or ""),
+                    "side": str(getattr(order, "side", "") or ""),
+                    "qty": float(getattr(order, "qty", 0.0) or 0.0),
+                    "filled_qty": float(getattr(order, "filled_qty", 0.0) or 0.0),
+                    "status": str(getattr(order, "status", "") or ""),
+                    "submitted_at": str(getattr(order, "submitted_at", "") or ""),
+                    "updated_at": str(getattr(order, "updated_at", "") or ""),
+                }
+            )
+        return rows
+
+    def get_recent_orders(
+        self, after: datetime, limit: int = 200
+    ) -> list[dict[str, Any]]:
+        if after.tzinfo is None:
+            after = after.replace(tzinfo=timezone.utc)
+        orders = self._call_with_retries(
+            f"get_orders(recent:{after.isoformat()})",
+            lambda: self._trading.get_orders(
+                filter=GetOrdersRequest(
+                    status=QueryOrderStatus.ALL,
+                    after=after,
+                    limit=limit,
+                    direction=Sort.DESC,
+                    nested=True,
+                )
+            ),
+        )
+        rows: list[dict[str, Any]] = []
+        for order in orders:
+            rows.append(
+                {
+                    "id": str(order.id),
+                    "client_order_id": str(getattr(order, "client_order_id", "") or ""),
+                    "symbol": str(getattr(order, "symbol", "") or ""),
+                    "side": str(getattr(order, "side", "") or ""),
+                    "qty": float(getattr(order, "qty", 0.0) or 0.0),
+                    "filled_qty": float(getattr(order, "filled_qty", 0.0) or 0.0),
+                    "status": str(getattr(order, "status", "") or ""),
+                    "submitted_at": str(getattr(order, "submitted_at", "") or ""),
+                    "updated_at": str(getattr(order, "updated_at", "") or ""),
                 }
             )
         return rows

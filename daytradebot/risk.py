@@ -7,10 +7,34 @@ from datetime import datetime
 from pathlib import Path
 from zoneinfo import ZoneInfo
 
+from typing import Any
+
 from daytradebot.config import Settings
 
 log = logging.getLogger(__name__)
 NY = ZoneInfo("America/New_York")
+
+
+def et_day_stats(risk_state_dir: str, equity: float) -> dict[str, Any]:
+    """Read persisted ET-day baseline for Discord / status."""
+    path = Path(risk_state_dir) / "risk_state.json"
+    out: dict[str, Any] = {"baseline": None, "dd_pct": None, "halted": False}
+    if not path.is_file():
+        return out
+    try:
+        state = json.loads(path.read_text(encoding="utf-8"))
+    except Exception:
+        return out
+    today = datetime.now(NY).date().isoformat()
+    if str(state.get("date_et", "")) != today:
+        return out
+    baseline = float(state.get("baseline_equity", 0.0) or 0.0)
+    halted = bool(state.get("halted", False))
+    out["baseline"] = baseline if baseline > 0 else None
+    out["halted"] = halted
+    if baseline > 0 and equity > 0:
+        out["dd_pct"] = (equity / baseline - 1.0) * 100.0
+    return out
 
 
 @dataclass(frozen=True)

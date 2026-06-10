@@ -57,6 +57,9 @@ class Settings:
     discord_webhook_url: str
     discord_on_trade: bool
     discord_cycle_report: bool
+    discord_balance_interval_sec: int
+    discord_session_notices: bool
+    discord_holiday_ahead_days: int
     discord_min_interval_sec: int
     alpaca_retry_attempts: int
     alpaca_retry_base_delay_sec: float
@@ -94,7 +97,16 @@ class Settings:
             discord_webhook_url=os.getenv("DAYTRADEBOT_DISCORD_WEBHOOK_URL", "").strip(),
             discord_on_trade=_parse_bool(os.getenv("DAYTRADEBOT_DISCORD_ON_TRADE", "1"), True),
             discord_cycle_report=_parse_bool(os.getenv("DAYTRADEBOT_DISCORD_CYCLE_REPORT", "0")),
-            discord_min_interval_sec=int(os.getenv("DAYTRADEBOT_DISCORD_MIN_INTERVAL_SEC", "1")),
+            discord_balance_interval_sec=int(
+                os.getenv("DAYTRADEBOT_DISCORD_BALANCE_INTERVAL_SEC", "28800")
+            ),
+            discord_session_notices=_parse_bool(
+                os.getenv("DAYTRADEBOT_DISCORD_SESSION_NOTICES", "1"), True
+            ),
+            discord_holiday_ahead_days=int(
+                os.getenv("DAYTRADEBOT_DISCORD_HOLIDAY_AHEAD_DAYS", "3")
+            ),
+            discord_min_interval_sec=int(os.getenv("DAYTRADEBOT_DISCORD_MIN_INTERVAL_SEC", "2")),
             alpaca_retry_attempts=int(os.getenv("DAYTRADEBOT_ALPACA_RETRY_ATTEMPTS", "3")),
             alpaca_retry_base_delay_sec=float(
                 os.getenv("DAYTRADEBOT_ALPACA_RETRY_BASE_DELAY_SEC", "2.0")
@@ -124,6 +136,12 @@ class Settings:
             ("https://discord.com/api/webhooks/", "https://discordapp.com/api/webhooks/")
         ):
             raise ValueError("DAYTRADEBOT_DISCORD_WEBHOOK_URL must be a Discord webhook URL")
+        if self.discord_min_interval_sec < 0:
+            raise ValueError("DAYTRADEBOT_DISCORD_MIN_INTERVAL_SEC cannot be negative")
+        if self.discord_balance_interval_sec < 0:
+            raise ValueError("DAYTRADEBOT_DISCORD_BALANCE_INTERVAL_SEC cannot be negative")
+        if self.discord_holiday_ahead_days < 0:
+            raise ValueError("DAYTRADEBOT_DISCORD_HOLIDAY_AHEAD_DAYS cannot be negative")
         if not self.paper:
             got = os.getenv("DAYTRADEBOT_CONFIRM_LIVE", "").strip()
             if got != "YES_I_ACCEPT_REAL_MONEY_RISK":

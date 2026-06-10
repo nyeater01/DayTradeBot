@@ -8,6 +8,7 @@ from daytradebot.config import Settings
 from daytradebot.discord_notify import CycleContext, DiscordNotifier, wire_broker_discord
 from daytradebot.engine_intraday import run_intraday_cycle
 from daytradebot.risk import RiskController
+from daytradebot.session_notices import maybe_send_session_notices
 from daytradebot.session_policy import (
     in_regular_session,
     now_et,
@@ -55,22 +56,28 @@ def run_loop(settings: Settings, broker: AlpacaBroker, once: bool) -> None:
 
     while True:
         ctx = CycleContext()
-        ok = False
+        cycle_succeeded = False
         try:
             ctx = run_cycle(settings, broker, risk_ctrl)
-            ok = True
+            cycle_succeeded = True
         except Exception as exc:
             log.exception("Cycle failed")
             if discord:
                 try:
-                    discord.send_failure(settings, exc)
+                    discord.send_failure(settings, broker, exc)
                 except Exception:
                     log.exception("Discord failure alert failed")
-        if discord and ok and settings.discord_cycle_report:
+        if discord:
             try:
-                discord.send_cycle_report(settings, broker, ctx)
+                discord.maybe_send_order_updates(settings, broker)
+                discord.maybe_send_open_order_snapshot(settings, broker)
+                if cycle_succeeded:
+                    maybe_send_session_notices(settings, broker, discord)
+                    discord.maybe_send_balance_report(settings, broker)
+                    if settings.discord_cycle_report:
+                        discord.send_cycle_report(settings, broker, ctx)
             except Exception:
-                log.exception("Discord cycle report failed")
+                log.exception("Discord notification failed")
         if once:
             break
         log.info("Sleeping %s seconds", settings.poll_seconds)
