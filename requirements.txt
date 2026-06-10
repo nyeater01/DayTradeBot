@@ -1,0 +1,4 @@
+alpaca-py==0.43.4
+python-dotenv==1.2.2
+pandas==3.0.3
+numpy==2.4.6

@@ -1,0 +1,17 @@
+Linux deploy (mini PC alongside StockBot)
+=========================================
+
+1. Clone to ~/projects/DayTradeBot (StockBot stays in ~/projects/StockBot)
+2. cp .env.example .env — use SECOND Alpaca paper API keys + separate Discord webhook
+3. ./scripts/ensure-venv.sh && ./scripts/smoke-check.sh
+4. Install user service:
+     mkdir -p ~/.config/systemd/user
+     cp scripts/daytradebot.service ~/.config/systemd/user/
+     systemctl --user daemon-reload
+     systemctl --user enable --now daytradebot.service
+5. Logs: ./scripts/daytradebot-ctl.sh logs  (or logs/daytradebot.log)
+
+Optional auto-update (every 15m cron, same pattern as StockBot):
+  */15 * * * * ~/projects/DayTradeBot/scripts/auto-update.sh >> ~/projects/DayTradeBot/logs/update.log 2>&1
+
+Do NOT reuse StockBot's ALPACA keys unless you want both bots on one account.

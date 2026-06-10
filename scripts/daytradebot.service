@@ -1,0 +1,15 @@
+[Unit]
+Description=DayTradeBot intraday loop (Alpaca paper/live)
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+WorkingDirectory=%h/projects/DayTradeBot
+ExecStart=%h/projects/DayTradeBot/scripts/run-daemon.sh
+Restart=on-failure
+RestartSec=30
+Environment=PYTHONUNBUFFERED=1
+
+[Install]
+WantedBy=default.target

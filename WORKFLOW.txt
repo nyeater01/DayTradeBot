@@ -1,0 +1,27 @@
+DayTradeBot — same mini PC as StockBot, separate everything else.
+
+Windows dev:
+  cd Desktop\DayTradeBot
+  python -m venv .venv
+  .venv\Scripts\activate
+  pip install -r requirements.txt
+  copy .env.example .env   (second Alpaca paper keys + DAYTRADEBOT_DISCORD_WEBHOOK_URL)
+  python -m daytradebot --once
+  python -m daytradebot --discord-test
+
+GitHub:
+  Create repo DayTradeBot, push main.
+
+NUC (~/.projects/DayTradeBot):
+  git clone ...
+  cp .env.example .env   (different keys/webhook than StockBot)
+  ./scripts/ensure-venv.sh
+  ./scripts/smoke-check.sh
+  cp scripts/daytradebot.service ~/.config/systemd/user/
+  systemctl --user daemon-reload
+  systemctl --user enable --now daytradebot.service
+
+Control:
+  ./scripts/daytradebot-ctl.sh status|logs|restart|smoke
+
+StockBot is unaffected — two services, two .env files, two webhooks.
