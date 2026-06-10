@@ -5,11 +5,14 @@ Wants=network-online.target
 
 [Service]
 Type=simple
-WorkingDirectory=%h/projects/DayTradeBot
-ExecStart=%h/projects/DayTradeBot/scripts/run-daemon.sh
+WorkingDirectory=/home/stonk/projects/DayTradeBot
+EnvironmentFile=-/home/stonk/projects/DayTradeBot/.env
+Environment=DAYTRADEBOT_LOG_FILE=/home/stonk/projects/DayTradeBot/logs/daytradebot.log
+ExecStart=/home/stonk/projects/DayTradeBot/scripts/run-daemon.sh
 Restart=on-failure
-RestartSec=30
-Environment=PYTHONUNBUFFERED=1
+RestartSec=60
+StartLimitIntervalSec=600
+StartLimitBurst=10
 
 [Install]
 WantedBy=default.target

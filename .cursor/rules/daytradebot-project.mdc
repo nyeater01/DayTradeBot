@@ -1,0 +1,14 @@
+---
+description: DayTradeBot project context — separate from StockBot
+alwaysApply: true
+---
+
+# DayTradeBot
+
+- **Not StockBot.** Repo: `nyeater01/DayTradeBot`. NUC: `~/projects/DayTradeBot` only.
+- Read `AGENTS.md`, `docs/REPO_SEPARATION.md`, and `docs/ROADMAP.md` before non-trivial changes.
+- Goal: intraday confluence (VWAP, volume profile, pivots, ICT killzones). Paper until tuned.
+- Git: Windows `Desktop/DayTradeBot` → push → NUC pull. Never commit `.env`, `.venv`, `.state`.
+- Env vars: `DAYTRADEBOT_*` + shared `ALPACA_*` in **this repo's `.env` only** (second paper account).
+- Discord: `DAYTRADEBOT_DISCORD_WEBHOOK_URL` — different channel from StockBot.
+- Do not edit StockBot files from this workspace unless user explicitly asks for cross-repo docs.

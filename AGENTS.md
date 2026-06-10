@@ -1,6 +1,6 @@
 # DayTradeBot — agent context
 
-Intraday companion to **StockBot** on the same mini PC. Separate git repo, Alpaca paper account, Discord webhook, systemd service.
+Intraday companion to **StockBot** on the same mini PC. Separate git repo, Alpaca paper account, Discord webhook, systemd service. See **`docs/REPO_SEPARATION.md`** — never mix repos or `.env` files.
 
 ## Workflow
 
