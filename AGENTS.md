@@ -1,6 +1,8 @@
 # DayTradeBot — agent context
 
-Intraday companion to **StockBot** on the same mini PC. Separate git repo, Alpaca paper account, Discord webhook, systemd service. See **`docs/REPO_SEPARATION.md`** — never mix repos or `.env` files.
+Read this (and `docs/ROADMAP.md`) at the start of a session. Intraday companion to **StockBot** on the same mini PC. See **`docs/REPO_SEPARATION.md`** — never mix repos or `.env` files.
+
+**Status (2026-06-12):** Second Alpaca paper keys on NUC; `daytradebot.service` **enabled + active**. Profitability paper profile on NUC `.env` (`ny_am` only, confluence 4). First meaningful watch: **2026-06-15** Mon AM killzone 9:30–11:00 ET.
 
 ## Workflow
 
@@ -11,7 +13,9 @@ Intraday companion to **StockBot** on the same mini PC. Separate git repo, Alpac
 
 ## Strategy
 
-Confluence intraday entries during **ICT killzones** (default `ny_am`, `ny_pm` ET):
+**Operating model (profitability-first paper profile, NUC `.env` 2026-06-12):** selective AM-session confluence — quality over quantity. Tune from logs after ~20 trading days; do not chase trade count.
+
+Confluence intraday entries during **ICT killzones** (NUC paper: **`ny_am` only** — 9:30–11:00 ET):
 
 | Signal | Role |
 |--------|------|
@@ -20,9 +24,13 @@ Confluence intraday entries during **ICT killzones** (default `ny_am`, `ny_pm` E
 | Floor pivots | Prior day H/L/C → P, R1, S1 |
 | Killzones | Entries only inside enabled windows |
 
+**NUC paper tuning (not in git):** `CONFLUENCE_MIN=4`, `MAX_TRADES_PER_DAY=2`, `DEPLOY_FRAC=0.30`, stop/target 0.4%/0.8% (2:1), tighter pivot tolerance.
+
 - **Flat** outside killzone and at session close (configurable)
 - **Stop / target** from entry (`DAYTRADEBOT_STOP_LOSS_PCT`, `TAKE_PROFIT_PCT`)
 - **Risk:** max trades/day, daily loss halt (blocks new entries only)
+
+**Path to live:** paper month → score expectancy → code upgrades (brackets, spread filter, backtest) → small live size.
 
 ## Code map
 
@@ -34,6 +42,14 @@ Confluence intraday entries during **ICT killzones** (default `ny_am`, `ny_pm` E
 | Risk | `daytradebot/risk.py` |
 | Discord | `daytradebot/discord_notify.py` |
 | Config | `daytradebot/config.py`, `.env.example` |
+
+## When changing behavior
+
+- Match existing style; minimal diff
+- Add/update tests under `tests/` for signal or policy logic
+- Update `docs/ROADMAP.md` Done / Now / Later (and changelog when shipping)
+- Document new env keys in `.env.example` only — never commit mini PC `.env`
+- NUC runtime tuning: edit `~/projects/DayTradeBot/.env` on mini PC; note values + date in ROADMAP
 
 ## Tests
 

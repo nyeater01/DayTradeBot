@@ -31,18 +31,23 @@ git -C ~/projects/DayTradeBot remote get-url origin
 systemctl --user status stockbot.service daytradebot.service
 ```
 
-## DayTradeBot before Alpaca keys
+## DayTradeBot status (2026-06-12)
 
-Service is installed but **not started** until `ALPACA_API_KEY` and `ALPACA_SECRET_KEY` are in `~/projects/DayTradeBot/.env`. Discord webhook can be tested without keys:
+- **Live on NUC:** second Alpaca paper keys in `~/projects/DayTradeBot/.env` (never commit)
+- **`daytradebot.service`:** enabled + active; separate Discord webhook from StockBot
+- **Profitability paper profile:** runtime `.env` only — see `docs/ROADMAP.md`
+
+Smoke / control:
+
+```bash
+cd ~/projects/DayTradeBot
+./scripts/smoke-check.sh
+./scripts/daytradebot-ctl.sh status
+./scripts/daytradebot-ctl.sh logs
+```
+
+Discord test (no keys required):
 
 ```bash
 cd ~/projects/DayTradeBot && ./scripts/run.sh --discord-test
-```
-
-Service unit is installed under `~/.config/systemd/user/daytradebot.service` but **disabled** until Alpaca keys are in `.env` (avoids restart loops). After keys:
-
-```bash
-./scripts/smoke-check.sh
-./scripts/daytradebot-ctl.sh enable
-./scripts/daytradebot-ctl.sh restart
 ```
